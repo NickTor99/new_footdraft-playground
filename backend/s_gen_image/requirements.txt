@@ -1,0 +1,12 @@
+fastapi~=0.124.4
+uvicorn
+diffusers
+transformers
+accelerate
+safetensors
+omegaconf
+Pillow~=12.1.0
+pydantic~=2.12.5
+rembg[gpu]
+controlnet_aux
+onnxruntime-gpu

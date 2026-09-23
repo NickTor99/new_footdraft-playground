@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Env files
+backend/*/app/.env
+backend/*/app/.env_debug
+backend/.env
+backend/s_gen_image/models/*

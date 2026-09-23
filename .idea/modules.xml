@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/backend/backend.iml" filepath="$PROJECT_DIR$/backend/backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/s_auth/s_auth.iml" filepath="$PROJECT_DIR$/backend/s_auth/s_auth.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/s_draft/s_draft.iml" filepath="$PROJECT_DIR$/backend/s_draft/s_draft.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/s_groups/s_groups.iml" filepath="$PROJECT_DIR$/backend/s_groups/s_groups.iml" />
+    </modules>
+  </component>
+</project>

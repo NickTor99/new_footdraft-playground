@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Aggiungi nel tuo CSS globale o in uno style tag */
+@keyframes shoot-up {
+    0% { transform: scale(0.5); opacity: 0; }
+    20% { transform: scale(1.1); opacity: 1; }
+    30% { transform: scale(1); }
+    60% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-100vh) scale(0.2); opacity: 0; }
+}
+
+@keyframes shoot-down {
+    0% { transform: scale(0.5); opacity: 0; }
+    20% { transform: scale(1.1); opacity: 1; }
+    30% { transform: scale(1); }
+    60% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(100vh) scale(0.2); opacity: 0; }
+}
+
+.animate-shoot-up {
+    animation: shoot-up 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-shoot-down {
+    animation: shoot-down 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

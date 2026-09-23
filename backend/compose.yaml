@@ -1,0 +1,146 @@
+services:
+  auth_service:
+    build:
+      context: .              # <--- FONDAMENTALE: Imposta la root come contesto
+      dockerfile: s_auth/Dockerfile # <--- Specifica dove sta il Dockerfile
+    ports:
+      - '8000:8000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  group_service:
+    build:
+      context: .
+      dockerfile: s_groups/Dockerfile
+    ports:
+      - '8001:8001'
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8000
+      - ELASTIC_SEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth_service:
+        condition: service_started
+
+  draft_service:
+    build:
+      context: .
+      dockerfile: s_draft/Dockerfile
+    ports:
+      - '8002:8002'
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8000
+      - GROUP_SERVICE_URL=http://group_service:8001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth_service:
+        condition: service_started
+
+  #gen_image_service:
+      #build:
+      #context: .
+      #dockerfile: s_gen_image/Dockerfile
+        #ports:
+      #- "8003:8003"
+        #volumes:
+      # Mappiamo la cartella locale dove scaricherai il file .safetensors
+      # così non devi ricostruire l'immagine se cambi modello
+        #- ./s_gen_image/models:/models
+      #- ./s_gen_image/app/main.py:/app/main.py
+      #deploy:
+        #resources:
+          #reservations:
+          #devices:
+          #- driver: nvidia
+          #   count: 1
+        #   capabilities: [ gpu ]
+
+  postgres:
+    image: postgres:15 # Meglio fissare una versione
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # <--- FONDAMENTALE: Persistenza dati
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ] # Test più specifico
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    # 1. Comando FONDAMENTALE per attivare la persistenza (AOF - Append Only File)
+    # Senza questo, Redis ignora il volume per i dati e usa solo la RAM.
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      # 2. Mappiamo la cartella dove Redis salva il file .aof
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio_server
+    restart: always
+    # Comando per avviare il server e la console UI
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # API S3
+      - "9001:9001" # Web Console (Login)
+    env_file:
+      - .env
+    volumes:
+      - minio_data:/data # Persistenza dei file
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3
+    container_name: elasticsearch_dev
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Disabilitato solo per facilitare lo sviluppo locale
+      - xpack.security.http.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  sync_worker:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: sync_worker/Dockerfile
+    container_name: sync_worker_dev
+    ports:
+      - "8004:8004"
+    depends_on:
+      - postgres
+      - elasticsearch
+    volumes:
+      # Mappiamo la cartella /app/data del container su un volume persistente
+      - sync_data:/app/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  es_data:
+  sync_data:
