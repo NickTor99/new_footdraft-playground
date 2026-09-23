@@ -42,7 +42,6 @@ async def register(regDTO: UserRegistrationDTO):
 async def login(logDTO: UserLoginDTO):
     try:
         token = await auth_service.authenticate(loginData=logDTO)
-        print(token)
         return AuthTokenDTO(access_token=token, token_type="Bearer")
     except ServiceException as e:
         raise e

@@ -1,0 +1,1 @@
+Add a models to generate images in this directory. For exemple, download this model: counterfeit_v3.safetensors

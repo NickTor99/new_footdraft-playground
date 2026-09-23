@@ -13,4 +13,4 @@ wheels/
 backend/*/app/.env
 backend/*/app/.env_debug
 backend/.env
-backend/s_gen_image/models/*
+backend/s_gen_image/models/*.safetensors
